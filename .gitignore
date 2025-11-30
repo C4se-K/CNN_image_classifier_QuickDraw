@@ -421,4 +421,10 @@ FodyWeavers.xsd
 .venv/
 env/
 venv/
-/data
+
+/data/*
+!/data/.gitkeep
+
+/models/*
+!/models/.gitkeep
+
