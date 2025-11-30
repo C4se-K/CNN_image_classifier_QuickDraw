@@ -3,13 +3,14 @@ import numpy as np
 from PIL import Image
 
 
-INPUT_DIR = "data//quickdraw_raw//"
+INPUT_DIR = "data/quickdraw/numpy_bitmap/"
 OUTPUT_DIR = "data//quickdraw_64//"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def load_bin(path):
-    data = np.frombuffer(open(path, "rb").read(), dtype=np.uint8)
+    with open(path, "rb") as f:
+        data = np.frombuffer(f.read(), dtype=np.uint8)
     data = data.reshape(-1, 28, 28)
     return data
 
@@ -23,10 +24,10 @@ for file in os.listdir(INPUT_DIR):
 
     data = load_bin(os.path.join(INPUT_DIR, file))
 
-    for i, img in enumerate(data):
-        img = Image.fromarray(img)
-        imtg = img.resize((64, 64), Image.NEAREST)
-        img.save(os.path.join(class_dir, f"{class_name}_{i}.png"))
+    for i, img_array in enumerate(data):
+        img = Image.fromarray(img_array)
+        img_resized = img.resize((64, 64), Image.NEAREST)
 
-print("processed : ", class_name)
+        img_resized.save(os.path.join(class_dir, f"{class_name}_{i}.png"))
 
+    print(f"processed : {class_name}")
