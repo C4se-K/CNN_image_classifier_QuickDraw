@@ -8,6 +8,10 @@ import os
 #custom cnn model
 from src.model import SketchCNN
 
+
+OUTPUT_DIR = "model//"
+
+
 def main():
     transform = transforms.Compose([
         transforms.Grayscale(),
@@ -51,8 +55,6 @@ def main():
     torch.save(model.state_dict(), save_path)
     print("model saved")
 
-
-OUTPUT_DIR = "model//"
 
 if __name__ == "__main__":
     main()
