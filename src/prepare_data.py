@@ -34,14 +34,14 @@ class QuickDrawNPY(Dataset):
         return self.total
 
     def __getitem__(self, idx):
-        class_idx = np.searchsorted(self.cumsum, idx)
+        class_idx = np.searchsorted(self.cumsum, idx, side="right")
 
         if class_idx == 0:
             local_idx = idx
         else:
             local_idx = idx - self.cumsum[class_idx - 1]
 
-        arr = self.data[class_idx][local_idx]
+        arr = self.data[class_idx][local_idx].reshape(28, 28)
 
         img = self.to_pil(arr)
 

@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 class SketchCNN(nn.Module):
     def __init__(self, num_classes=345):
@@ -31,7 +30,7 @@ class SketchCNN(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(128 * 8 * 8, 128),
+            nn.Linear(128 * 3 * 3, 128),
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(128, num_classes)
