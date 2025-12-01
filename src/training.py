@@ -44,8 +44,10 @@ def main():
     print("detected classes:", num_classes)
 
     model = SketchCNN(num_classes=num_classes)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
     criterion = nn.CrossEntropyLoss()
+
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
 
     scripts.check_torch_cuda.check()
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -53,7 +55,7 @@ def main():
 
     print("training start")
 
-    for epoch in range(40):
+    for epoch in range(20):
         model.train()
         total_loss = 0.0
 
@@ -72,6 +74,8 @@ def main():
         val_acc = evaluate(model, test_loader, device)
 
         print(f"Epoch {epoch+1} | Loss: {avg_loss:.4f} | Val Acc: {val_acc*100:.2f}%")
+
+        scheduler.step()
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, "model_weights.pth"))
