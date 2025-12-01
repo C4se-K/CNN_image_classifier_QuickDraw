@@ -21,7 +21,7 @@ class QuickDrawNPY(Dataset):
 
         for cls in self.classes:
             path = os.path.join(root_dir, cls + ".npy")
-            arr = np.load(path)
+            arr = np.load(path, mmap_mode="r")
             self.data.append(arr)
             self.lengths.append(len(arr))
 
