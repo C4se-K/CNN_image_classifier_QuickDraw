@@ -7,7 +7,7 @@ The goal is straightforward: learn a fast, reasonably expressive architecture th
 ---
 
 ## Project Structure
-
+```text
 .
 │ inference.py
 │ model.py
@@ -21,7 +21,7 @@ The goal is straightforward: learn a fast, reasonably expressive architecture th
 │ └───pycache
 └───pycache
 
-
+```
 
 - **model.py** — Defines the `SketchCNN` architecture.  
 - **prepare_data.py** — Contains the `QuickDrawNPY` dataset class.  
@@ -131,3 +131,4 @@ python training.py
 
 
     
+
