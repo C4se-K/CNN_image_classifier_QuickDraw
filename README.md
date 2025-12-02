@@ -1,136 +1,144 @@
-# QuickSketch CNN — 28×28 Sketch Classification
+QuickSketch CNN — 28×28 Sketch Classification
 
-This project implements a compact convolutional neural network for classifying **28×28 grayscale drawings** from the **Quick, Draw!** dataset (or subsets exported in `.npy` format). The codebase handles dataset ingestion, training, evaluation, and exporting the model.
+This project implements a compact convolutional neural network for
+classifying 28×28 grayscale drawings from the Quick, Draw! dataset (or
+subsets exported in .npy format). The codebase handles dataset
+ingestion, training, evaluation, and exporting the model.
 
-The goal is straightforward: learn a fast, reasonably expressive architecture that performs well on low-resolution synthetic line drawings without depending on heavyweight backbones.
+The goal is straightforward: learn a fast, reasonably expressive
+architecture that performs well on low-resolution synthetic line
+drawings without depending on heavyweight backbones.
 
----
+1. Project Structure
 
-## Project Structure
-```text
-.
-│ inference.py
-│ model.py
-│ prepare_data.py
-│ training.py
-│
-├───scripts
-│ │ check_torch_cuda.py
-│ │ export_as_onnx.py
-│ │ prepare_subset.py
-│ └───pycache
-└───pycache
+. │ inference.py │ model.py │ prepare_data.py │ training.py │
+├───scripts │ │ check_torch_cuda.py │ │ export_as_onnx.py │ │
+prepare_subset.py │ └───pycache └───pycache
 
-```
+-   model.py — Defines the SketchCNN architecture.
+-   prepare_data.py — Contains the QuickDrawNPY dataset class.
+-   training.py — Training loop, evaluation function, checkpoint saving.
+-   inference.py — (Optional) run trained model on a single image or
+    batch.
+-   scripts/ — Utility tools for subset generation, CUDA diagnostics,
+    and ONNX export.
 
-- **model.py** — Defines the `SketchCNN` architecture.  
-- **prepare_data.py** — Contains the `QuickDrawNPY` dataset class.  
-- **training.py** — Training loop, evaluation function, checkpoint saving.  
-- **inference.py** — Run trained model inference.  
-- **scripts/** — Subset generation, CUDA diagnostics, and ONNX export.
+2. Dataset Format
 
----
+The project expects a directory containing one .npy file per class,
+where each file holds a NumPy array of shape:
 
-## Dataset Format
+(num_samples, 784) # flattened 28x28 grayscale images
 
-The project expects a directory containing **one `.npy` file per class**, where each file holds:
+Example structure:
 
-
-Example:
-```text
-data/
-└── quickdraw_subset_10k/
-    ├── airplane.npy
-    ├── apple.npy
-    ├── backpack.npy
-    ...
-```
+data/ └── quickdraw_subset_10k/ ├── airplane.npy ├── apple.npy ├──
+backpack.npy …
 
 During loading:
 
-- All `.npy` arrays are concatenated.
-- Each sample becomes a **(1, 28, 28)** float tensor in `[0,1]`.
-- Class labels are derived from the sorted filenames.
-- Optional transforms apply after tensor conversion.
+-   Arrays are concatenated into a single dataset.
+-   Each sample is reshaped to (1, 28, 28) and normalized to [0,1].
+-   Optionally, transforms apply after conversion to a tensor.
+-   Class labels are derived from the filename order.
 
----
+3. The CNN Architecture
 
-## Model Architecture: SketchCNN
+SketchCNN is a deliberately compact but layered model. It uses three
+convolutional blocks, aggressive feature expansion, and lightweight
+classification.
 
-`SketchCNN` is a compact but deep convolutional network tuned for low-resolution doodle-like drawings.
+Feature Extractor
 
-### Feature Extractor
+-   Early layers use 64→128→256 channels.
+-   Each block uses Conv → BatchNorm → LeakyReLU repeated twice.
+-   MaxPool reduces spatial resolution in the first two blocks; a final
+    AvgPool compresses features before flattening.
+-   LeakyReLU avoids the dead-ReLU problem common in sparse line
+    drawings.
 
-- Convolutional blocks expand channels **64 → 128 → 256**.
-- Each block uses repeated **Conv → BatchNorm → LeakyReLU** layers.
-- **MaxPool** downsampling in the first two stages; final **AvgPool** compresses to 4×4.  
-- LeakyReLU mitigates dead features often seen in sparse line drawings.
+After the final pooling, the feature maps have shape 256×4×4.
 
-Output shape before the classifier: **256×4×4**.
+Classifier
 
-### Classifier
+-   A single hidden layer of size 256, followed by dropout.
+-   Final linear layer outputs num_classes.
 
-- Flatten → Linear(4096 → 256) → LeakyReLU → Dropout → Linear → logits.
-- Final output dimension = number of classes (auto-detected).
+4. Training Procedure
 
----
+Training is configured in training.py.
 
-## Training
+Setup
 
-Training configuration lives in `training.py`.
+-   Loss: CrossEntropy
+-   Optimizer: Adam (lr=1e-3, weight_decay=1e-4)
+-   Scheduler: StepLR (step_size=10, gamma=0.5)
+-   Epochs: 20
+-   Batch size: 256
+-   Device: CUDA if available
 
-### Hyperparameters
+Splitting
 
-- **Loss:** CrossEntropy  
-- **Optimizer:** Adam (lr=1e-3, weight_decay=1e-4)  
-- **Scheduler:** StepLR (step_size=10, gamma=0.5)  
-- **Epochs:** 20  
-- **Batch size:** 256  
-- **Device:** CUDA if available
+The dataset is split 90/10 into train/test using random_split.
 
-### Data Split
+Transforms include normalization:
 
-Dataset split into 90% train / 10% test via `random_split`.
+Normalize(mean=0.5, std=0.5)
 
-Normalization: ```bash Normalize(mean=0.5, std=0.5) ```
-
-### Loop
+Loop
 
 Each epoch:
 
-1. Full training pass with gradient updates.
-2. Validation accuracy computed via `evaluate()`.
-3. Scheduler step.
+1.  Full train pass.
+2.  Validation accuracy computed with evaluate().
+3.  Scheduler step.
 
-Training prints epoch loss and validation accuracy.
+Model is saved to:
 
-### Saving
+models/model_weights.pth
 
-After training, weights are saved to: ```bash models/model_weights.pth ```
+5. Running Training
 
-
----
-
-## Running Training
-
-```bash
 python training.py
-```
 
+Ensure the dataset path in training.py points to your .npy directory.
 
+6. Inference
 
+Example usage:
 
+model = SketchCNN(num_classes=345)
+model.load_state_dict(torch.load(“models/model_weights.pth”))
+model.eval()
 
+img: tensor of shape (1, 1, 28, 28)
 
+pred = model(img).argmax(dim=1).item()
 
+7. ONNX Export
 
+python scripts/export_as_onnx.py
 
+8. Subset Preparation
 
+python scripts/prepare_subset.py
 
+9. CUDA Diagnostics
 
+python scripts/check_torch_cuda.py
 
+10. Requirements
 
+-   Python 3.10+
+-   PyTorch
+-   torchvision
+-   NumPy
 
-    
+pip install torch torchvision numpy
 
+11. Notes
 
+-   The dataset loader loads all samples into RAM; large exports may
+    require streaming.
+-   The model assumes 28×28 inputs.
+-   No augmentation is used, though it can be added for robustness.
