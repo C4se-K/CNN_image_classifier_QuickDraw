@@ -33,7 +33,7 @@ class SketchCNN(nn.Module):
             nn.BatchNorm2d(256),
             nn.LeakyReLU(0.1, inplace=True),
 
-            nn.AdaptiveAvgPool2d((4, 4))
+            nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
         )
 
         self.classifier = nn.Sequential(
