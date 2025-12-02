@@ -1,4 +1,4 @@
-QuickSketch CNN — 28×28 Sketch Classification
+# QuickSketch CNN — 28×28 Sketch Classification
 
 This project implements a compact convolutional neural network for
 classifying 28×28 grayscale drawings from the Quick, Draw! dataset (or
@@ -9,12 +9,12 @@ The goal is straightforward: learn a fast, reasonably expressive
 architecture that performs well on low-resolution synthetic line
 drawings without depending on heavyweight backbones.
 
-1. Project Structure
-
+## 1. Project Structure
+```text
 . │ inference.py │ model.py │ prepare_data.py │ training.py │
 ├───scripts │ │ check_torch_cuda.py │ │ export_as_onnx.py │ │
 prepare_subset.py │ └───pycache └───pycache
-
+```
 -   model.py — Defines the SketchCNN architecture.
 -   prepare_data.py — Contains the QuickDrawNPY dataset class.
 -   training.py — Training loop, evaluation function, checkpoint saving.
@@ -23,7 +23,7 @@ prepare_subset.py │ └───pycache └───pycache
 -   scripts/ — Utility tools for subset generation, CUDA diagnostics,
     and ONNX export.
 
-2. Dataset Format
+## 2. Dataset Format
 
 The project expects a directory containing one .npy file per class,
 where each file holds a NumPy array of shape:
@@ -42,7 +42,7 @@ During loading:
 -   Optionally, transforms apply after conversion to a tensor.
 -   Class labels are derived from the filename order.
 
-3. The CNN Architecture
+## 3. The CNN Architecture
 
 SketchCNN is a deliberately compact but layered model. It uses three
 convolutional blocks, aggressive feature expansion, and lightweight
@@ -64,7 +64,7 @@ Classifier
 -   A single hidden layer of size 256, followed by dropout.
 -   Final linear layer outputs num_classes.
 
-4. Training Procedure
+## 4. Training Procedure
 
 Training is configured in training.py.
 
@@ -97,13 +97,13 @@ Model is saved to:
 
 models/model_weights.pth
 
-5. Running Training
+## 5. Running Training
 
 python training.py
 
 Ensure the dataset path in training.py points to your .npy directory.
 
-6. Inference
+## 6. Inference
 
 Example usage:
 
@@ -115,19 +115,19 @@ img: tensor of shape (1, 1, 28, 28)
 
 pred = model(img).argmax(dim=1).item()
 
-7. ONNX Export
+## 7. ONNX Export
 
 python scripts/export_as_onnx.py
 
-8. Subset Preparation
+## 8. Subset Preparation
 
 python scripts/prepare_subset.py
 
-9. CUDA Diagnostics
+## 9. CUDA Diagnostics
 
 python scripts/check_torch_cuda.py
 
-10. Requirements
+## 10. Requirements
 
 -   Python 3.10+
 -   PyTorch
@@ -136,9 +136,10 @@ python scripts/check_torch_cuda.py
 
 pip install torch torchvision numpy
 
-11. Notes
+## 11. Notes
 
 -   The dataset loader loads all samples into RAM; large exports may
     require streaming.
 -   The model assumes 28×28 inputs.
 -   No augmentation is used, though it can be added for robustness.
+
