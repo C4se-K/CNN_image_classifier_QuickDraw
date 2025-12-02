@@ -29,7 +29,7 @@ def main():
         T.Normalize((0.5,), (0.5,))
     ])
 
-    dataset = QuickDrawNPY("data/quickdraw_subset_5k/", transform=transform)
+    dataset = QuickDrawNPY("data/quickdraw_subset_10k/", transform=transform)
 
     train_size = int(0.9 * len(dataset))
     test_size = len(dataset) - train_size
@@ -37,8 +37,8 @@ def main():
     print("preparing dataset splits...")
     train_ds, test_ds = random_split(dataset, [train_size, test_size])
 
-    train_loader = DataLoader(train_ds, batch_size=256, shuffle=True, num_workers=8, pin_memory=True)
-    test_loader = DataLoader(test_ds, batch_size=256, num_workers=8, pin_memory=True)
+    train_loader = DataLoader(train_ds, batch_size=256, shuffle=True, num_workers=0, pin_memory=True)
+    test_loader = DataLoader(test_ds, batch_size=256, num_workers=0, pin_memory=True)
 
     num_classes = len(dataset.classes)
     print("detected classes:", num_classes)
