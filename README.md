@@ -37,13 +37,14 @@ The project expects a directory containing **one `.npy` file per class**, where 
 
 
 Example:
+```text
 data/
 └── quickdraw_subset_10k/
     ├── airplane.npy
     ├── apple.npy
     ├── backpack.npy
     ...
-
+```
 
 During loading:
 
@@ -114,7 +115,7 @@ After training, weights are saved to: ```bash models/model_weights.pth ```
 
 ```bash
 python training.py
-
+```
 
 
 
@@ -131,4 +132,5 @@ python training.py
 
 
     
+
 
